@@ -7,7 +7,7 @@ namespace Construo.NotificationAPI.Services;
 
 public class TwilioService : ISmsServiceProvider
 {
-    private const string MessagingServiceSid = "MG3f1f9e3b23c43d7b4ca2da2d38d94ea7";
+    private const string MessagingServiceSid = "";
     private readonly TwilioConfig _twilioConfig;
     private readonly IConfiguration _configuration;
     private readonly ILogger<SmsService> _logger;
