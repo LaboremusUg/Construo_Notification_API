@@ -1,0 +1,41 @@
+name: Production       #production workflow deploys to azure vm
+
+on:
+  workflow_dispatch:
+    inputs:
+      CLIENT_ENV:
+        type: choice
+        required: true
+        description: Select environment
+        options:
+        - Production
+        - Uat
+        - Test
+        - Sit
+      DOWNLOAD_PACKAGE:
+        type: boolean
+        required: true
+        description: Download Package?
+      DEPLOY_IIS:
+        type: boolean
+        required: true
+        description: Deploy to LUG test environment?
+jobs:
+  RUN_PROCESS:
+    uses: LaboremusUg/Reusable_Work_Flows/.github/workflows/netcore_dfcu.yml@main
+    with:
+      DOTNET_VERSION: "8.x.x"
+      CLIENT_ENV: "${{ github.event.inputs.CLIENT_ENV }}"
+      DOWNLOAD_PACKAGE: "${{ github.event.inputs.DOWNLOAD_PACKAGE }}"
+      DEPLOY_IIS: "${{ github.event.inputs.DEPLOY_IIS }}"
+      PROJECT_ROOT_DIRECTORY: "Dfcu_AutoDataCapture_Notification_${{github.event.inputs.CLIENT_ENV}}"
+      SITE_NAME: "Dfcu_AutoDataCapture_Notification_${{github.event.inputs.CLIENT_ENV}}"
+      PROJECT_NAME: "Construo.NotificationAPI"
+      ENCRYPT: "true"
+    secrets:
+      NUGET_URL: ${{ secrets.NUGET_URL }}
+      NUGET_TOKEN: ${{ secrets.NUGET_TOKEN }}
+      WEBDEPLOY_PASSWORD: ${{ secrets.WEBDEPLOY_PASSWORD }}
+      WEBDEPLOY_USER: ${{ secrets.WEBDEPLOY_USER }}
+      SERVER_IP: ${{ secrets.SERVER_IP }}
+      SERVER_PORT: ${{ secrets.SERVER_PORT }}

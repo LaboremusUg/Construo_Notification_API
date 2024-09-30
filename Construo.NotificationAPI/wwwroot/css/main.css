@@ -1,0 +1,89 @@
+﻿body, html {
+    height: 100%;
+    font: 12px "Lucida Grande", Helvetica, Arial, Sans-Serif;
+    margin: 0;
+}
+
+#home-page {
+    background-image: url(../images/laboremus.svg);
+    height: 100vh;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+}
+
+h1{ 
+    margin: auto;
+}
+
+.streamline-button {
+    margin-top: 3rem;
+    background-color: #fff;
+    color: #111;
+    border: 2px solid #F1416C;
+    padding: 10px 20px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    margin-left: 20px;
+}
+
+.streamline-button:hover {
+    background-color: #F1416C;
+    color: #fff;
+}
+
+.info-button {
+    margin-top: 3rem;
+    background-color: #fff;
+    color: #111;
+    border: 2px solid #181c32;
+    padding: 10px 20px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    margin-left: 20px;
+}
+
+.info-button:hover {
+    background-color: #181c32;
+    color: #fff;
+}
+
+.success-button {
+    margin-top: 3rem;
+    background-color: #fff;
+    color: #111;
+    border: 2px solid #4CAF50;
+    padding: 10px 20px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    margin-left: 20px;
+}
+
+.success-button:hover {
+    background-color: #4CAF50;
+    color: #fff;
+}
+
+.caption {
+    position: relative;
+    top: 50%;
+    width: 50%;
+    text-align: center;
+    color: #000;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.caption h1.border {
+    background-color: gold;
+    color: #111;
+    padding: 18px;
+    font-size: 25px;
+    letter-spacing: 0.3rem;
+}

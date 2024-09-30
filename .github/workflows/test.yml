@@ -1,0 +1,28 @@
+name: Test
+
+on:
+  push:
+    branches:
+      - "develop"
+
+  workflow_dispatch:
+  
+jobs:
+  RUN_PROCESS:
+    uses: LaboremusUg/Reusable_Work_Flows/.github/workflows/netcore_dfcu.yml@main
+    with:
+      DOTNET_VERSION: "8.x.x"
+      CLIENT_ENV: "Test"
+      PROJECT_ROOT_DIRECTORY: "Construo_Notification_Api"
+      SITE_NAME: "Construo_Notification_Api"
+      PROJECT_NAME: "Construo.NotificationAPI"
+      DEPLOY_IIS: "true"
+      ENCRYPT: "false"
+      DOWNLOAD_PACKAGE: "false"
+    secrets:
+      NUGET_URL: ${{ secrets.NUGET_URL }}
+      NUGET_TOKEN: ${{ secrets.NUGET_TOKEN }}
+      WEBDEPLOY_PASSWORD: ${{ secrets.WEBDEPLOY_PASSWORD }}
+      WEBDEPLOY_USER: ${{ secrets.WEBDEPLOY_USER }}
+      SERVER_IP: ${{ secrets.SERVER_IP }}
+      SERVER_PORT: ${{ secrets.SERVER_PORT }}
