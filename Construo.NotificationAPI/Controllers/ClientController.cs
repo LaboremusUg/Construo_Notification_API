@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Construo.NotificationAPI.Controllers;
 
-[Microsoft.AspNetCore.Mvc.Route("api/client")]
+[Route("api/client")]
 public class ClientController : BaseController
 {
     private readonly IClientRepository _clientRepository;

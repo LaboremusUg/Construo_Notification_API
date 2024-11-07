@@ -11,11 +11,12 @@ using FluentValidation;
 using Hangfire;
 using Hangfire.Dashboard;
 using Hangfire.PostgreSql;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Serilog;
 
-var environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "";
+var environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? string.Empty;
 Log.Logger = new LoggerConfiguration()
     .WriteTo.Console()
     .WriteTo.Debug()
@@ -23,36 +24,21 @@ Log.Logger = new LoggerConfiguration()
     .CreateLogger();
 
 Log.Information("Starting up Env:{Environment}", environment);
+
 try
 {
-
     var builder = WebApplication.CreateBuilder(args);
+    builder.Host.UseSerilog();
     var configuration = builder.Configuration;
 
-    var connectionString = configuration.GetConnectionString("DefaultConnection");
     // Add services to the container.
+
+    var authenticationSettings = configuration.GetAuthServiceSettings();
+    var connectionString = configuration.GetConnectionString("DefaultConnection");
+    builder.Services.AddLogging();
+    builder.Logging.AddConsole();
     builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseNpgsql(connectionString));
     builder.Services.AddHangfire(options => options.UsePostgreSqlStorage(connectionString));
-
-    builder.Services.AddControllers();
-    // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-    builder.Services.AddEndpointsApiExplorer();
-    builder.Services.CustomAddSwaggerGen(configuration);
-
-    //builder.Services.AddSwaggerGen();
-
-    builder.Services.AddCors(options =>
-    {
-        options.AddPolicy("default", policy =>
-        {
-            policy.WithOrigins()
-            .AllowAnyHeader()
-            .AllowAnyMethod()
-            .AllowCredentials();
-        });
-    });
-
-    var authenticationSettings = builder.Configuration.GetAuthServiceSettings();
 
     builder.Services.AddAuthentication("Bearer")
         .AddJwtBearer("Bearer", options =>
@@ -61,9 +47,44 @@ try
             options.Audience = authenticationSettings.ApiName;
             options.TokenValidationParameters = new TokenValidationParameters
             {
-                ValidateAudience = false
+                ValidTypes = new[] { "at+jwt", "JWT" },
+                ValidateAudience = true,
+                ValidateIssuer = true,
+                ValidateLifetime = true,
+                ValidateIssuerSigningKey = true,
+                ClockSkew = TimeSpan.Zero // Reduces time discrepancy issues
+            };
+            // Log authentication failures for debugging purposes
+            options.Events = new JwtBearerEvents
+            {
+                OnAuthenticationFailed = context =>
+                {
+                    Console.WriteLine("Authentication failed: " + context.Exception.Message);
+                    return Task.CompletedTask;
+                },
+                OnTokenValidated = context =>
+                {
+                    Console.WriteLine("Token validated successfully.");
+                    return Task.CompletedTask;
+                }
             };
         });
+
+    builder.Services.AddControllers();
+    builder.Services.AddEndpointsApiExplorer();
+    builder.Services.AddSwaggerGen();
+    builder.Services.CustomAddSwaggerGen(configuration);
+
+    builder.Services.AddCors(options =>
+    {
+        options.AddPolicy("default", policy =>
+        {
+            policy.WithOrigins()
+                  .AllowAnyHeader()
+                  .AllowAnyMethod()
+                  .AllowCredentials();
+        });
+    });
 
     builder.Services.AddHangfireServer();
     builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
@@ -71,7 +92,6 @@ try
     builder.Services.AddScoped<IServiceProviderRepository, ServiceProviderRepository>();
     builder.Services.AddScoped<IClientRepository, ClientRepository>();
     builder.Services.AddScoped<ISmsService, SmsService>();
-    builder.Services.AddScoped<IClientRepository, ClientRepository>();
     builder.Services.AddScoped<IEmailService, EmailService>();
     builder.Services.AddScoped<IMessageQueueRepository, MessageQueueRepository>();
     builder.Services.AddScoped<IMessageLoggingService, MessageLoggingService>();
@@ -87,8 +107,18 @@ try
 
     // Configure the HTTP request pipeline.
     if (app.Environment.IsDevelopment())
-    { }
+    {
+        app.UseSwagger();
+        app.UseSwaggerUI();
+    }
 
+    app.UseHttpsRedirection();
+    app.CustomUseSwagger(configuration);
+    app.UseHttpsRedirection();
+    app.UseAuthentication();
+    app.UseAuthorization();
+
+    app.UseSerilogRequestLogging();
 
     app.Use(async (context, next) =>
     {
@@ -97,28 +127,21 @@ try
         context.Response.Headers.Add("X-Content-Type-Options", "nosniff");
         context.Response.Headers.Add("X-Frame-Options", "DENY");
         context.Response.Headers.Add("X-XSS-Protection", "1; mode=block");
-        //context.Response.Headers.Add("Content-Security-Policy", "default - src 'self';");
         await next();
     });
 
-    app.CustomUseSwagger(configuration);
-
-    app.UseHttpsRedirection();
     app.UseCors("default");
-    app.UseAuthorization();
     app.UseHangfireServer();
-    app.UseAuthentication();
-    app.UseAuthorization();
     app.UseHangfireDashboard("/queue", new DashboardOptions
     {
         Authorization = new IDashboardAuthorizationFilter[] { new HangfireAuthorizationFilter() }
     });
-    app.MapControllers();
 
-    var provider = app.Services.GetService<IServiceProvider>().CreateScope().ServiceProvider;
+    app.MapControllers();
 
     Seed.InitDatabase(app);
     app.UseFileServer();
+
     app.Run();
 }
 catch (Exception ex)

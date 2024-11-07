@@ -1,4 +1,5 @@
-﻿using Construo.NotificationAPI.Models;
+﻿using Construo.NotificationAPI.Core.Extensions;
+using Construo.NotificationAPI.Models;
 using Construo.NotificationAPI.ViewModels;
 
 namespace Construo.NotificationAPI.Core.Helpers;
@@ -61,5 +62,10 @@ public static class Extensions
     public static string GetDfcuUrl(this IConfiguration configuration)
     {
         return configuration.GetSection("Providers:Dfcu:Url").Value;
+    }
+
+    public static SeqSettings GetSeqSettings(this IConfiguration configuration)
+    {
+        return configuration.GetSection(SeqSettings.SectionName).Get<SeqSettings>();
     }
 }
