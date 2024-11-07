@@ -31,14 +31,14 @@ try
     builder.Host.UseSerilog();
     var configuration = builder.Configuration;
 
-    // Add services to the container.
-
-    var authenticationSettings = configuration.GetAuthServiceSettings();
     var connectionString = configuration.GetConnectionString("DefaultConnection");
-    builder.Services.AddLogging();
-    builder.Logging.AddConsole();
     builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseNpgsql(connectionString));
     builder.Services.AddHangfire(options => options.UsePostgreSqlStorage(connectionString));
+
+    builder.Services.AddLogging();
+    builder.Logging.AddConsole();
+
+    var authenticationSettings = configuration.GetAuthServiceSettings();
 
     builder.Services.AddAuthentication("Bearer")
         .AddJwtBearer("Bearer", options =>
@@ -52,9 +52,9 @@ try
                 ValidateIssuer = true,
                 ValidateLifetime = true,
                 ValidateIssuerSigningKey = true,
-                ClockSkew = TimeSpan.Zero // Reduces time discrepancy issues
+                ClockSkew = TimeSpan.Zero
             };
-            // Log authentication failures for debugging purposes
+
             options.Events = new JwtBearerEvents
             {
                 OnAuthenticationFailed = context =>
@@ -105,7 +105,6 @@ try
 
     var app = builder.Build();
 
-    // Configure the HTTP request pipeline.
     if (app.Environment.IsDevelopment())
     {
         app.UseSwagger();
@@ -119,7 +118,6 @@ try
     app.UseAuthorization();
 
     app.UseSerilogRequestLogging();
-
     app.Use(async (context, next) =>
     {
         context.Response.Headers.Add("Pragma", "no-cache");
@@ -138,10 +136,8 @@ try
     });
 
     app.MapControllers();
-
     Seed.InitDatabase(app);
     app.UseFileServer();
-
     app.Run();
 }
 catch (Exception ex)
