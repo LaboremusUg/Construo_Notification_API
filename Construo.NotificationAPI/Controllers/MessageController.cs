@@ -1,9 +1,9 @@
-﻿using FluentValidation;
-using Hangfire;
-using Construo.NotificationAPI.Core.Helpers;
+﻿using Construo.NotificationAPI.Core.Helpers;
 using Construo.NotificationAPI.Models;
 using Construo.NotificationAPI.Services;
 using Construo.NotificationAPI.ViewModels;
+using FluentValidation;
+using Hangfire;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using System.Net;
@@ -54,36 +54,56 @@ public class MessageController : BaseController
 
         if (emailDetails == null)
         {
-            _logger.LogCritical($"NullReferenceException: EmailDetails was null");
-
-            response.Message = "EmailDetails was null";
-            response.StatusCode = HttpStatusCode.BadRequest;
+            _logger.LogCritical("NullReferenceException: EmailDetails was null");
+            return new CustomResponse
+            {
+                Message = "EmailDetails was null",
+                StatusCode = HttpStatusCode.BadRequest
+            };
         }
 
-        else if (!ModelState.IsValid)
+        if (!ModelState.IsValid)
         {
-            _logger.LogCritical(
-                $"Validation failed: {ModelState.Values.SelectMany(s => s.Errors.Select(q => q.ErrorMessage))}");
+            var errors = string.Join(", ", ModelState.Values.SelectMany(s => s.Errors).Select(e => e.ErrorMessage));
+            _logger.LogCritical($"Validation failed: {errors}");
 
-            response.Message = "EmailDetails validation failed";
-            response.StatusCode = HttpStatusCode.InternalServerError;
+            return new CustomResponse
+            {
+                Message = "EmailDetails validation failed",
+                StatusCode = HttpStatusCode.BadRequest
+            };
         }
 
-        else
+        try
         {
             _logger.LogInformation("Adding message to the queue...");
+
+            // Create message queue item
             var messageQueueItem = await _messageLoggingService.CreateAsync(emailDetails.MessageQueueItem());
+
+            // Schedule email sending
             BackgroundJob.Schedule(() => _emailService.SendMailAsync(emailDetails, messageQueueItem.Id),
-                emailDetails.TimeToSend);
+                                   emailDetails.TimeToSend);
 
             _logger.LogInformation("The email has been successfully added to the queue");
 
-            response.Message = "The email has been successfully added to the queue";
-            response.StatusCode = HttpStatusCode.OK;
+            return new CustomResponse
+            {
+                Message = "The email has been successfully added to the queue",
+                StatusCode = HttpStatusCode.OK
+            };
         }
-
-        return response;
+        catch (Exception ex)
+        {
+            _logger.LogError($"An error occurred while processing the email: {ex.Message}");
+            return new CustomResponse
+            {
+                Message = "An error occurred while processing your request",
+                StatusCode = HttpStatusCode.InternalServerError
+            };
+        }
     }
+
 
     /// <summary>   
     /// Endpoint that allows a client to POST an SMS to be sent

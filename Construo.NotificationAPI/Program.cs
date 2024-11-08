@@ -30,7 +30,7 @@ try
     var builder = WebApplication.CreateBuilder(args);
     builder.Host.UseSerilog();
     var configuration = builder.Configuration;
-
+    AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
     var connectionString = configuration.GetConnectionString("DefaultConnection");
     builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseNpgsql(connectionString));
     builder.Services.AddHangfire(options => options.UsePostgreSqlStorage(connectionString));

@@ -3,6 +3,7 @@ using System;
 using Construo.NotificationAPI.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Construo.NotificationAPI.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241108074042_003")]
+    partial class _003
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -63,6 +66,7 @@ namespace Construo.NotificationAPI.Migrations
                         .HasColumnType("integer");
 
                     b.Property<string>("OverriddenRecipients")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<int?>("RecipientContactId")
@@ -72,6 +76,7 @@ namespace Construo.NotificationAPI.Migrations
                         .HasColumnType("integer");
 
                     b.Property<string>("SentByContact")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<int?>("SentByContactId")
@@ -81,6 +86,7 @@ namespace Construo.NotificationAPI.Migrations
                         .HasColumnType("integer");
 
                     b.Property<string>("StatusComment")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("Subject")

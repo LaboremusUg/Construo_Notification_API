@@ -30,7 +30,7 @@ public class EmailDetails
     /// <summary>
     /// Track email object
     /// </summary>
-    public TrackMessageObject TrackMail { get; set; }
+    public TrackMessageObject? TrackMail { get; set; }
 
     /// <summary>
     /// Email template type
@@ -40,7 +40,7 @@ public class EmailDetails
     /// <summary>
     /// Model bound to the template
     /// </summary>
-    public object Model { get; set; }
+    public object? Model { get; set; }
 
     public MessageQueueItem MessageQueueItem()
     {
@@ -112,7 +112,7 @@ public class Message
     /// <summary>
     /// Attachments
     /// </summary>
-    public List<EmailAttachment> Attachments { get; set; }
+    public List<EmailAttachment>? Attachments { get; set; }
 }
 
 public class EmailAttachment

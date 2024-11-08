@@ -82,21 +82,21 @@ public class EmailService : IEmailService
                 message.To.Add(new MailAddress(to));
             }
 
-            if (email.Message.Cc != null && email.Message.Cc.Any())
-            {
-                foreach (var cc in email.Message.Cc)
-                {
-                    message.CC.Add(new MailAddress(cc));
-                }
-            }
+            //if (email.Message.Cc != null && email.Message.Cc.Any())
+            //{
+            //    foreach (var cc in email.Message.Cc)
+            //    {
+            //        message.CC.Add(new MailAddress(cc));
+            //    }
+            //}
 
-            if (email.Message.Bcc != null && email.Message.Bcc.Any())
-            {
-                foreach (var bcc in email.Message.Bcc)
-                {
-                    message.Bcc.Add(new MailAddress(bcc));
-                }
-            }
+            //if (email.Message.Bcc != null && email.Message.Bcc.Any())
+            //{
+            //    foreach (var bcc in email.Message.Bcc)
+            //    {
+            //        message.Bcc.Add(new MailAddress(bcc));
+            //    }
+            //}
 
             if (email.Message.Attachments != null && email.Message.Attachments.Any())
             {
